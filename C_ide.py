@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 import sys
 from subprocess import Popen, PIPE, STDOUT
+import datetime
+import glob
+import os
+import platform
 
 if sys.version_info.major == 2:
     import Tkinter as tk
@@ -11,14 +15,6 @@ else:
     import tkinter.tkMessageBox as pop_up
     import tkinter.tkFileDialog as tkFileDialog
 
-
-import datetime
-
-import glob
-
-import os
-
-import platform
 
 WINDOWS_ENDING = ".exe"
 LINUX_ENDING = ".out"
