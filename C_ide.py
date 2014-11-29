@@ -1,9 +1,6 @@
+# -*- coding: utf-8 -*-
 import sys
 from subprocess import Popen, PIPE, STDOUT
-import datetime
-import glob
-import os
-import platform
 
 if sys.version_info.major == 2:
     import Tkinter as tk
@@ -14,6 +11,14 @@ else:
     import tkinter.tkMessageBox as pop_up
     import tkinter.tkFileDialog as tkFileDialog
 
+
+import datetime
+
+import glob
+
+import os
+
+import platform
 
 WINDOWS_ENDING = ".exe"
 LINUX_ENDING = ".out"
@@ -42,7 +47,7 @@ def replace_old_text(new_text):
     main_text.delete("1.0", tk.END)
     main_text.insert(tk.INSERT, new_text, "a")
     
-def _open():
+def open_():
     """
     Opens a file using the built-in file explorer,
     and displays its text in the main text field.
@@ -64,9 +69,9 @@ def invalid_characters_in_title():
     title widget. Mainly accented letters.
     """
     try:
-        title = file_title.get()
+        __ = file_title.get()
     except UnicodeEncodeError:
-        return False
+        return True
     
 def invalid_characters_in_body():
     """
@@ -76,7 +81,7 @@ def invalid_characters_in_body():
     try:
         f.write(main_text.get(1.0, tk.END))
     except UnicodeEncodeError:
-        return False
+        return True
 
 def save(alert=True):
     """
@@ -101,18 +106,18 @@ def save(alert=True):
         except UnicodeEncodeError:
             pop_up.showerror("Invalid characters",INVALID_CHARACTERS_MESSAGE)
             return False
-        try:
-            if alert:
+        if alert:
+            try:
                 pop_up.showinfo("File saved succesfully.",
                 SAVING_SUCCESS_MESSAGE.format(filename=filename))
-        except UnicodeEncodeError:
-            pop_up.showerror("Invalid characters",INVALID_CHARACTERS_MESSAGE)
+            except UnicodeEncodeError:
+                pop_up.showerror("Invalid characters",INVALID_CHARACTERS_MESSAGE)
 
 def exec_bash(shell_command):
     """
     Runs a shell_command.
     Taken from http://stackoverflow.com/questions/4256107/running-bash-commands-in-python
-    User contributions licensed under cc by-sa 3.0 with attribution required
+    User contributions are licensed under cc by-sa 3.0 with attribution required.
     """
     event = Popen(shell_command, shell=True, stdin=PIPE, stdout=PIPE, 
     stderr=STDOUT)
@@ -127,7 +132,7 @@ def compile_(filename,flags):
 
 def system_is(name):
     """
-    Returns True if the os is equal to the argument.
+    Returns True if the os is equal to the given name.
     >>> system_is("Linux")
     True # If you are on linux
     False # If you are on Windows or Mac
@@ -146,13 +151,33 @@ def decide_ending():
     elif system_is("Linux"):
         return LINUX_ENDING
         
+
+def nice_format_for_execute(result):
+	"""
+	The second argument is always going to be None,
+	I only care about the first one
+	"""
+	return result[0]
+		
 def execute(filename="a"):
     """
     Executes the "a" executable taking care that
     the ending is correct.
+    Format the result before outputting it.
     """
     filename += decide_ending()
-    return exec_bash("./"+filename)
+    result = exec_bash("./"+filename)
+    result = nice_format_for_execute(result)
+    return result
+    
+def delete(string,sub_string):
+    """
+    Returns the string without the sub_string chars.
+    >>> delete("Hello, how are you?","Hello, ")
+    how are you?
+    """
+    string = string.replace(sub_string,"")
+    return string
 
 def get_flags():
     """
@@ -163,18 +188,15 @@ def get_flags():
     """
     text = main_text.get(1.0, tk.END)
     flags = ""
-    if "FLAGS" in text:
-        lines = text.splitlines()
-        line1 = lines[0]
-        line1 = line1.replace("// FLAGS","")
-        flags = line1
-        flags = flags.replace("// FLAGS","")
+    lines = text.splitlines()
+    first_line = lines[0]
+    flags = delete(first_line,"// FLAGS")
     return flags
 
 def run():
     """
     Runs the file.
-    If there is a compile time error it is shown.
+    If there is a compile time error it is shown. #TODO format compile errrors
     Otherwise, if the compilation is successful the result
     is shown in a pop up.
     """
@@ -187,13 +209,15 @@ def run():
     else:
         pop_up.showinfo("Error found when compiling",result)
 
+
+
 # Here the GUI code starts.
 root = tk.Tk()
 root.wm_title("C ide")
 
 
 menubar = tk.Menu(root)
-menubar.add_command(label="Open", command=_open)
+menubar.add_command(label="Open", command=open_)
 menubar.add_command(label="Save", command=save)
 menubar.add_command(label="Run", command=run)
 root.config(menu=menubar)
@@ -201,15 +225,15 @@ root.config(menu=menubar)
 
 top = tk.Frame(root)
 tk.Label(root, text="Title:").pack(in_=top, side=tk.LEFT)
-
 file_title = tk.Entry(root)
 file_title.pack(in_=top, side=tk.RIGHT)
-
 top.pack()
 
 
 main_text = tk.Text(root)
-main_text.pack()
+main_text.pack(expand=True, fill='both')
 
-if __name__ == "__main__":
-    tk.mainloop()
+tk.mainloop()
+
+
+
