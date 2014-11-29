@@ -202,4 +202,5 @@ top.pack()
 main_text = tk.Text(root)
 main_text.pack()
 
-tk.mainloop()
+if __name__ == "__main__":
+    tk.mainloop()
