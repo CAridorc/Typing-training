@@ -201,11 +201,13 @@ def get_flags():
     in the following format:
     // FLAGS -myflag1 -myflag2
     """
+    flags = ""
     text = main_text.get(1.0, tk.END)
     flags = ""
     lines = text.splitlines()
     first_line = lines[0]
-    flags = delete(first_line, "// FLAGS")
+    if "// FLAGS" in first_line:
+        flags += delete(first_line, "// FLAGS")
     return flags
 
 
