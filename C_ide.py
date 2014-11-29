@@ -39,6 +39,7 @@ def replace_old_title(new_title):
     file_title.delete(0, tk.END)
     file_title.insert(tk.INSERT, new_title)
 
+
 def replace_old_text(new_text):
     """
     Replace the old content of the widget
@@ -46,7 +47,8 @@ def replace_old_text(new_text):
     """
     main_text.delete("1.0", tk.END)
     main_text.insert(tk.INSERT, new_text, "a")
-    
+
+
 def open_():
     """
     Opens a file using the built-in file explorer,
@@ -56,12 +58,14 @@ def open_():
     replace_old_title(filename)
     with open(filename) as f:
         replace_old_text(f.read())
-        
+
+
 def title_is_empty():
     """
     Return True if the tite is empty.
     """
     return not file_title.get()
+
 
 def invalid_characters_in_title():
     """
@@ -72,7 +76,8 @@ def invalid_characters_in_title():
         __ = file_title.get()
     except UnicodeEncodeError:
         return True
-    
+
+
 def invalid_characters_in_body():
     """
     Handles invalid characters in the
@@ -82,6 +87,7 @@ def invalid_characters_in_body():
         f.write(main_text.get(1.0, tk.END))
     except UnicodeEncodeError:
         return True
+
 
 def save(alert=True):
     """
@@ -93,25 +99,28 @@ def save(alert=True):
     if title_is_empty():
         pop_up.showerror("No title.", EMPTY_TITLE_ERROR_MESSAGE_SAVE)
         return False
-    
+
     if invalid_characters_in_title():
-        pop_up.showerror("Invalid characters",INVALID_CHARACTERS_MESSAGE)
+        pop_up.showerror("Invalid characters", INVALID_CHARACTERS_MESSAGE)
         return False
-    
-    filename = file_title.get()    
-    
+
+    filename = file_title.get()
+
     with open(filename, "w+") as f:
         try:
             f.write(main_text.get(1.0, tk.END))
         except UnicodeEncodeError:
-            pop_up.showerror("Invalid characters",INVALID_CHARACTERS_MESSAGE)
+            pop_up.showerror("Invalid characters", INVALID_CHARACTERS_MESSAGE)
             return False
         if alert:
             try:
                 pop_up.showinfo("File saved succesfully.",
-                SAVING_SUCCESS_MESSAGE.format(filename=filename))
+                                SAVING_SUCCESS_MESSAGE.format(filename=filename))
             except UnicodeEncodeError:
-                pop_up.showerror("Invalid characters",INVALID_CHARACTERS_MESSAGE)
+                pop_up.showerror(
+                    "Invalid characters",
+                    INVALID_CHARACTERS_MESSAGE)
+
 
 def exec_bash(shell_command):
     """
@@ -119,16 +128,18 @@ def exec_bash(shell_command):
     Taken from http://stackoverflow.com/questions/4256107/running-bash-commands-in-python
     User contributions are licensed under cc by-sa 3.0 with attribution required.
     """
-    event = Popen(shell_command, shell=True, stdin=PIPE, stdout=PIPE, 
-    stderr=STDOUT)
+    event = Popen(shell_command, shell=True, stdin=PIPE, stdout=PIPE,
+                  stderr=STDOUT)
     return event.communicate()
 
-def compile_(filename,flags):
+
+def compile_(filename, flags):
     """
     Uses the gcc compiler to compile the file.
     """
-    command = "gcc " + filename +" " + flags
+    command = "gcc " + filename + " " + flags
     return exec_bash(command)
+
 
 def system_is(name):
     """
@@ -141,6 +152,7 @@ def system_is(name):
     if operating_system == name:
         return True
 
+
 def decide_ending():
     """
     Decides the correct ending of the executable file
@@ -150,15 +162,16 @@ def decide_ending():
         return WINDOWS_ENDING
     elif system_is("Linux"):
         return LINUX_ENDING
-        
+
 
 def nice_format_for_execute(result):
-	"""
-	The second argument is always going to be None,
-	I only care about the first one
-	"""
-	return result[0]
-		
+    """
+    The second argument is always going to be None,
+    I only care about the first one
+    """
+    return result[0]
+
+
 def execute(filename="a"):
     """
     Executes the "a" executable taking care that
@@ -166,18 +179,20 @@ def execute(filename="a"):
     Format the result before outputting it.
     """
     filename += decide_ending()
-    result = exec_bash("./"+filename)
+    result = exec_bash("./" + filename)
     result = nice_format_for_execute(result)
     return result
-    
-def delete(string,sub_string):
+
+
+def delete(string, sub_string):
     """
     Returns the string without the sub_string chars.
     >>> delete("Hello, how are you?","Hello, ")
     how are you?
     """
-    string = string.replace(sub_string,"")
+    string = string.replace(sub_string, "")
     return string
+
 
 def get_flags():
     """
@@ -190,8 +205,9 @@ def get_flags():
     flags = ""
     lines = text.splitlines()
     first_line = lines[0]
-    flags = delete(first_line,"// FLAGS")
+    flags = delete(first_line, "// FLAGS")
     return flags
+
 
 def run():
     """
@@ -200,15 +216,14 @@ def run():
     Otherwise, if the compilation is successful the result
     is shown in a pop up.
     """
-    save(alert = False)
+    save(alert=False)
     filename = file_title.get()
     flags = get_flags()
-    result = compile_(filename,flags)
+    result = compile_(filename, flags)
     if result == NO_ERROR:
-        pop_up.showinfo("The output is: ",execute())
+        pop_up.showinfo("The output is: ", execute())
     else:
-        pop_up.showinfo("Error found when compiling",result)
-
+        pop_up.showinfo("Error found when compiling", result)
 
 
 # Here the GUI code starts.
@@ -234,6 +249,3 @@ main_text = tk.Text(root)
 main_text.pack(expand=True, fill='both')
 
 tk.mainloop()
-
-
-
