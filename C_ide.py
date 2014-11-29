@@ -1,58 +1,90 @@
-# -*- coding: utf-8 -*-
-import sys
-from subprocess import Popen, PIPE, STDOUT
-
-if sys.version_info.major == 2:
-    import Tkinter as tk
-    import tkMessageBox as pop_up
-    import tkFileDialog
-else:
-    import Tkinter as tk
-    import tkinter.tkMessageBox as pop_up
-    import tkinter.tkFileDialog as tkFileDialog
-
-
 import datetime
 
 import glob
 
 import os
 
+import platform
 
-TXT_EXTENSION = ".txt"
-ALL_CHARS = "abcdefghijklmnopqrstuvwxyz12345690"
+WINDOWS_ENDING = ".exe"
+LINUX_ENDING = ".out"
 
 EMPTY_TITLE_ERROR_MESSAGE_SAVE = "Please write the name of the file you want to save in the given field."
 EMPTY_TITLE_ERROR_MESSAGE_OPEN = "Please write the name of the file you want to open in the given field."
-FILE_NOT_FOUND_ERROR_MESSAGE = "No file with the given title was found, remember that this text editor can only read files in its directory."
 INVALID_CHARACTERS_MESSAGE = "Unicode does not allow accented letters, please replace them in the following way: è -> e', à -> a'."
-SIGNATURE_TXT_NOT_FOUND_MESSAGE = "Please be sure that the file you want to open exists and that it is in the same folder of this editor."
 SAVING_SUCCESS_MESSAGE = "Your text is now stored in the {filename} file"
 
 NO_ERROR = ('', None)
 
 
-def _open():
-    filename = tkFileDialog.askopenfilename()
+def replace_old_title(new_title):
+    """
+    Replace the old content of the widget
+    file_title with a new title.
+    """
     file_title.delete(0, tk.END)
-    file_title.insert(tk.INSERT, filename)
-    with open(filename) as f:
-            main_text.delete("1.0", tk.END)
-            main_text.insert(tk.INSERT, f.read(), "a")
+    file_title.insert(tk.INSERT, new_title)
 
-
-def save(alert=True):
-    if not file_title.get():
-        pop_up.showerror("No title.", EMPTY_TITLE_ERROR_MESSAGE_SAVE)
-        return False
+def replace_old_text(new_text):
+    """
+    Replace the old content of the widget
+    main_text with a new title.
+    """
+    main_text.delete("1.0", tk.END)
+    main_text.insert(tk.INSERT, new_text, "a")
     
+def _open():
+    """
+    Opens a file using the built-in file explorer,
+    and displays its text in the main text field.
+    """
+    filename = tkFileDialog.askopenfilename()
+    replace_old_title(filename)
+    with open(filename) as f:
+        replace_old_text(f.read())
+        
+def title_is_empty():
+    """
+    Return True if the tite is empty.
+    """
+    return not file_title.get()
+
+def invalid_characters_in_title():
+    """
+    Handles invalid characters in the
+    title widget. Mainly accented letters.
+    """
     try:
         title = file_title.get()
     except UnicodeEncodeError:
-        pop_up.showerror("Invalid characters",INVALID_CHRACTERS_MESSAGE)
         return False
-        
-    filename = title    
+    
+def invalid_characters_in_body():
+    """
+    Handles invalid characters in the
+    title widget. Mainly accented letters.
+    """
+    try:
+        f.write(main_text.get(1.0, tk.END))
+    except UnicodeEncodeError:
+        return False
+
+def save(alert=True):
+    """
+    Saves the content of the main text widget into a file,
+    handles any kind of error that may happen.
+    If alert is True: showes a pop up message to inform the user if
+    the file is saved successfuly.
+    """
+    if title_is_empty():
+        pop_up.showerror("No title.", EMPTY_TITLE_ERROR_MESSAGE_SAVE)
+        return False
+    
+    if invalid_characters_in_title():
+        pop_up.showerror("Invalid characters",INVALID_CHARACTERS_MESSAGE)
+        return False
+    
+    filename = file_title.get()    
     
     with open(filename, "w+") as f:
         try:
@@ -60,28 +92,66 @@ def save(alert=True):
         except UnicodeEncodeError:
             pop_up.showerror("Invalid characters",INVALID_CHARACTERS_MESSAGE)
             return False
-        
         try:
             if alert:
                 pop_up.showinfo("File saved succesfully.",
-SAVING_SUCCESS_MESSAGE.format(filename=filename))
+                SAVING_SUCCESS_MESSAGE.format(filename=filename))
         except UnicodeEncodeError:
             pop_up.showerror("Invalid characters",INVALID_CHARACTERS_MESSAGE)
 
-
 def exec_bash(shell_command):
+    """
+    Runs a shell_command.
+    Taken from http://stackoverflow.com/questions/4256107/running-bash-commands-in-python
+    User contributions licensed under cc by-sa 3.0 with attribution required
+    """
     event = Popen(shell_command, shell=True, stdin=PIPE, stdout=PIPE, 
     stderr=STDOUT)
     return event.communicate()
 
-def compile_(filename,flags,optimization="-O3"):
-    command = "gcc " + filename + " " + optimization +" " + flags
+def compile_(filename,flags):
+    """
+    Uses the gcc compiler to compile the file.
+    """
+    command = "gcc " + filename +" " + flags
     return exec_bash(command)
 
-def execute(filename="a.out"):
+def system_is(name):
+    """
+    Returns True if the os is equal to the argument.
+    >>> system_is("Linux")
+    True # If you are on linux
+    False # If you are on Windows or Mac
+    """
+    operating_system = platform.system()
+    if operating_system == name:
+        return True
+
+def decide_ending():
+    """
+    Decides the correct ending of the executable file
+    basing on the os.
+    """
+    if system_is("Windows"):
+        return WINDOWS_ENDING
+    elif system_is("Linux"):
+        return LINUX_ENDING
+        
+def execute(filename="a"):
+    """
+    Executes the "a" executable taking care that
+    the ending is correct.
+    """
+    filename += decide_ending()
     return exec_bash("./"+filename)
 
 def get_flags():
+    """
+    Gets eventual compiler flags.
+    Flags must be in the first line of the file,
+    in the following format:
+    // FLAGS -myflag1 -myflag2
+    """
     text = main_text.get(1.0, tk.END)
     flags = ""
     if "FLAGS" in text:
@@ -93,33 +163,41 @@ def get_flags():
     return flags
 
 def run():
-    save(alert=False)
+    """
+    Runs the file.
+    If there is a compile time error it is shown.
+    Otherwise, if the compilation is successful the result
+    is shown in a pop up.
+    """
+    save(alert = False)
     filename = file_title.get()
     flags = get_flags()
     result = compile_(filename,flags)
     if result == NO_ERROR:
         pop_up.showinfo("The output is: ",execute())
     else:
-            pop_up.showinfo("Error found when compiling",result)
+        pop_up.showinfo("Error found when compiling",result)
 
+# Here the GUI code starts.
 root = tk.Tk()
 root.wm_title("C ide")
+
 
 menubar = tk.Menu(root)
 menubar.add_command(label="Open", command=_open)
 menubar.add_command(label="Save", command=save)
 menubar.add_command(label="Run", command=run)
-
 root.config(menu=menubar)
 
+
 top = tk.Frame(root)
-temp = tk.Label(root, text="Title:")
-temp.pack(in_=top, side=tk.LEFT)
+tk.Label(root, text="Title:").pack(in_=top, side=tk.LEFT)
 
 file_title = tk.Entry(root)
 file_title.pack(in_=top, side=tk.RIGHT)
 
 top.pack()
+
 
 main_text = tk.Text(root)
 main_text.pack()
