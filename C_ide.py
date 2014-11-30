@@ -220,21 +220,28 @@ def get_timing_request():
     return "// TIME THIS" in text
     
 
+def format_compile_error(error_message):
+    """
+    The compile error is not displayed nicely as a default.
+    This function formats it in order to make it nicer.
+    """
+    return delete(error_message[0],"\\")
+ 
 def run():
     """
     Runs the file.
-    If there is a compile time error it is shown. #TODO format compile errrors
+    If there is a compile time error it is shown.
     Otherwise, if the compilation is successful the result
     is shown in a pop up.
     """
     save(alert=False)
     filename = file_title.get()
     flags = get_flags()
-    result = compile_(filename, flags)
-    if result == NO_ERROR:
+    potential_error = compile_(filename, flags)
+    if potential_error == NO_ERROR:
         pop_up.showinfo("The output is: ", execute(get_timing_request()))
     else:
-        pop_up.showinfo("Error found when compiling", result)
+        pop_up.showinfo("Error found when compiling", format_compile_error(potential_error))
 
 
 # Here the GUI code starts.
