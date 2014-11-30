@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 import sys
 from subprocess import Popen, PIPE, STDOUT
-import datetime
-import glob
-import os
-import platform
 
 if sys.version_info.major == 2:
     import Tkinter as tk
@@ -15,6 +11,16 @@ else:
     import tkinter.tkMessageBox as pop_up
     import tkinter.tkFileDialog as tkFileDialog
 
+
+import datetime
+
+import glob
+
+import os
+
+import platform
+
+TITLE = "C ide"
 
 WINDOWS_ENDING = ".exe"
 LINUX_ENDING = ".out"
@@ -168,14 +174,17 @@ def nice_format_for_execute(result):
     return result[0]
 
 
-def execute(filename="a"):
+def execute(timing,filename="a"):
     """
     Executes the "a" executable taking care that
     the ending is correct.
     Format the result before outputting it.
     """
     filename += decide_ending()
-    result = exec_bash("./" + filename)
+    if timing:
+        result = exec_bash("time ./" + filename)
+    else:
+        result = exec_bash("./" + filename)
     result = nice_format_for_execute(result)
     return result
 
@@ -206,6 +215,15 @@ def get_flags():
         flags += delete(first_line, "// FLAGS")
     return flags
 
+def get_timing_request():
+    """
+    Gets the eventual request of timing the script.
+    The request can be in any line of the file
+    // TIME THIS
+    """
+    text = main_text.get(1.0, tk.END)
+    return "// TIME THIS" in text
+    
 
 def run():
     """
@@ -219,14 +237,14 @@ def run():
     flags = get_flags()
     result = compile_(filename, flags)
     if result == NO_ERROR:
-        pop_up.showinfo("The output is: ", execute())
+        pop_up.showinfo("The output is: ", execute(get_timing_request()))
     else:
         pop_up.showinfo("Error found when compiling", result)
 
 
 # Here the GUI code starts.
 root = tk.Tk()
-root.wm_title("C ide")
+root.wm_title(TITLE)
 
 
 menubar = tk.Menu(root)
