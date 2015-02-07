@@ -11,9 +11,9 @@ if sys.version_info.major == 2:
     import tkMessageBox as pop_up
     import tkFileDialog
 else:
-    import Tkinter as tk
-    import tkinter.tkMessageBox as pop_up
-    import tkinter.tkFileDialog as tkFileDialog
+    import tkinter as tk
+    import tkinter.messagebox as pop_up
+    import tkinter.filedialog as tkFileDialog
 
 TITLE = "C ide"
 
