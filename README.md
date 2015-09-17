@@ -24,3 +24,8 @@ To time the execution of the code, just add:
 <code>// TIME THIS</code> 
 
 anywhere in your code.
+
+Compatibility
+===
+
+Works in Python 2.x only.
