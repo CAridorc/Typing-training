@@ -1,25 +1,11 @@
-import os
-try:
-    import tkinter as tk
-except:
-    import Tkinter as tk
+try:import tkinter as tk
+except:import Tkinter as tk
 import random
-try:
-    from urllib import request
-except:
-    from urlib2 import request
-FONT = font=(None, 50)
 
-try:
-    with open("/usr/share/dict/words") as f:
-        words = f.read().splitlines()
-except IOError:
-    if not os.path.exists(os.path.dirname(filename)):
-        os.makedirs(os.path.dirname(filename))
-    with open("/usr/share/dict/words", "w+") as f:
-        f.write(urllib.urlopen("https://raw.githubusercontent.com/eneko/data-repository/master/data/words.txt").read().decode())
-                
-new_word = lambda: random.choice(words)
+FONT = font=(None, 50)
+WORDS = ['the', 'be', 'to', 'of', 'and', 'a', 'in', 'that', 'have', 'I', 'it', 'for', 'not', 'on', 'with', 'he', 'as', 'you', 'do', 'at', 'this', 'but', 'his', 'by', 'from', 'they', 'we', 'say', 'her', 'she', 'or', 'an', 'will', 'my', 'one', 'all', 'would', 'there', 'their', 'what', 'so', 'up', 'out', 'if', 'about', 'who', 'get', 'which', 'go', 'me', 'when', 'make', 'can', 'like', 'time', 'no', 'just', 'him', 'know', 'take', 'people', 'into', 'year', 'your', 'good', 'some', 'could', 'them', 'see', 'other', 'than', 'then', 'now', 'look', 'only', 'come', 'its', 'over', 'think', 'also', 'back', 'after', 'use', 'two', 'how', 'our', 'work', 'first', 'well', 'way', 'even', 'new', 'want', 'because', 'any', 'these', 'give', 'day', 'most', 'us']
+     
+new_word = lambda: random.choice(WORDS)
 
 root = tk.Tk()
 root.title("Typing trainer")
@@ -42,4 +28,3 @@ def if_equal_delete_and_take_other_phrase(ev):
 root.bind('<Key>', if_equal_delete_and_take_other_phrase)
 
 root.mainloop()
-
