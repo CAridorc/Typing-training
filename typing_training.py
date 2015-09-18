@@ -1,18 +1,23 @@
+import os
 try:
     import tkinter as tk
 except:
     import Tkinter as tk
 import random
-import urllib.request
-
+try:
+    from urllib import request
+except:
+    from urlib2 import request
 FONT = font=(None, 50)
 
 try:
     with open("/usr/share/dict/words") as f:
         words = f.read().splitlines()
 except IOError:
+    if not os.path.exists(os.path.dirname(filename)):
+        os.makedirs(os.path.dirname(filename))
     with open("/usr/share/dict/words", "w+") as f:
-        f.write(urllib.request.urlopen("https://raw.githubusercontent.com/eneko/data-repository/master/data/words.txt").read().decode())
+        f.write(urllib.urlopen("https://raw.githubusercontent.com/eneko/data-repository/master/data/words.txt").read().decode())
                 
 new_word = lambda: random.choice(words)
 
@@ -37,3 +42,4 @@ def if_equal_delete_and_take_other_phrase(ev):
 root.bind('<Key>', if_equal_delete_and_take_other_phrase)
 
 root.mainloop()
+
