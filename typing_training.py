@@ -35,7 +35,8 @@ def if_equal_delete_and_take_other_phrase(ev):
     if text_to_copy.cget("text") == typing_ground.get():
         typing_ground.delete(0, 'end')
         text_to_copy['text'] = new_word()
-        points['text'] = "Score: " + str(int(points['text'].split(': ')[-1]) + 1)
+        current_score = int(points['text'].split(': ')[-1])
+        points['text'] = "Score: " + str(int(current_score + 1))
         
 root.bind('<Key>', if_equal_delete_and_take_other_phrase)
 
